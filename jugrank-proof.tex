@@ -1,0 +1,300 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}                                                
+\usepackage{amsfonts}
+\usepackage{framed} 
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\title{JRank, a new Ranking and Tournament System for competitive Games}
+\author{Kai Londenberg (Kai.Londenberg@gmail.com)}
+\date{2010-08-25}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+Tournaments of a size where it gets impractical to let every player or team play against each other usually employ tournament and ranking systems which are
+far from being optimal in terms of efficiency or accuracy in their ranking results. JRank, a new tournament and ranking system is presented and analyzed, which
+seeks to eliminate many known deficiencies in existing tournament and ranking systems. It consists of an iterative algorithm for calculating a numerical 
+\textit{strength} for each player and of a tournament system which enhances on the known swiss system. It is shown that the algorithm converges to a solution.
+A method for adapting the methodology to different types of games by optimizing parameters for the minimization of errors on historical tournament data is given.
+Subsequently, the tournament system is evaluated in a monte carlo simulation, in which it's performance is compared with other popular tournament
+and ranking systems. The simulations show that the new system seems to outperform popular existing tournament systems in terms of accuracy and efficiency by 
+a wide margin. The paper closes with a discussion about possible statistical interpretations of the obtained results and possible variations o the system.
+
+\end{abstract}
+
+\section*{Introduction}
+
+
+
+\section*{Ranking Algorithm}
+
+Let P be the number of players, where each player is denoted by an index c, with $ c \in \mathbb{N} ; 1 <= p <= C $. Furthermore, let $ G _ p $ be the number of
+all games played by player p, each game denoted by the index g, with$ g \in \mathbb{N} ; 1 <= g <= G_p $. Formula elements with a subscript of pg
+are therefore associated with the player p and game g of that player. 
+\newline
+\newline
+Let $ W _ p \in \mathbb{R^*_+} $ be the absolute \textit{strength} of player p, and 
+$ O _{pg} \in \mathbb{R^*_+} $ be the \textit{strength} of the opposing player in the game g of player p. 
+\newline
+\newline
+For each game, we have two scores: $ A_{pg} \in \mathbb{N} $ is the number of points scored by player p in game g, while $ B_{cpg} \in \mathbb{N} $
+is the number of points scored by the opposing player.  
+\newline
+\newline
+Every game of one player against another can be interpreted to be a statistical measure of the relative \textit{strengths} of both players. Therefore, we have
+
+\begin{equation}
+ \frac{W_p}{ O_{pg} } = \frac{M(A_{pg})}{M(B_{pg})}  
+\end{equation}
+
+with $ M : \mathbb{N} \mapsto \mathbb{R^*_+} $ being a function which models the possibly nonlinear relationship between the ratio of the strengths, and
+the game results. One possible and reasonable definition of M(x) is
+
+\begin{equation}
+M(x) = ( x + k)^p
+\end{equation}
+
+with $ k,p \in \mathbb{R*_+} $ being model parameters which may be used to adapt for different game characteristics.
+\par
+
+Solving (1) for $ W_p $, we get
+
+\begin{equation}
+ W_p = O_{pg} \frac{M(A_{pg})}{M(B_{pg})}  
+\end{equation}
+
+To average out measurement errors, we take the geometric average of all measurements (i.e. Games), leading to
+
+\begin{equation}
+ W_p = \sqrt[G]{\displaystyle\prod_{g=1}^{G}{O_{pg}\frac{M(A_{pg})}{M(B_{pg})}}}
+\end{equation}
+
+Therefore, we have a system of P nonlinear equations with multiple variables ( $ W_p $ ) to be solved. 
+In the next section it will be shown that this can be done iteratively by choosing arbitrary
+$ W_p(0) > 0 $ and calculating the sequence:
+
+\begin{equation}
+W_p(n+1) = \sqrt[G]{\displaystyle\prod_{g=1}^{G}{O_{pg}(n)\frac{M(A_{pg})}{M(B_{pg})}}}
+\end{equation} 
+
+\pagebreak
+
+
+\subsection*{Proof of Convergence}
+
+To prove the convergence of these successive approximations, a suitable convergence criterion is available in
+literature about basic numerical analysis. The following box contains quotes from Rainer Kress, Numerical Analysis \cite[p.98ff]{NumAna}
+\small
+\begin{framed}
+
+\textbf{Convex Subset} A subset D of a linear space X is called convex if $ \lambda x + ( 1 - \lambda ) y \in D $ for all $ x,y \in D $ and all $ \lambda \in (0,1)$, i.e., if the
+straight line connecting x and y is contained in D. 
+\newline \newline
+[...]
+\newline \newline
+\textbf{Jacobian} 
+
+Let f : $ D \mapsto \mathbb{R}^n $ be a mapping
+
+$$
+f(x) = (f_1(x_1, ..., x_n), ..., f_n(x_1,...,x_n))^C
+$$
+
+where the $ f_j : D \mapsto \mathbb{R}, j = 1, ..., n $ are continuously differentiable functions. By 
+
+$$
+f'(x) = \left( \frac{\partial f_j}{\partial x_k}  \right)_{j,k=1,...n}
+$$
+
+we denote the Jacobian matrix of f.
+\newline \newline
+[...]
+\newline \newline
+\textbf{Theorem 6.8} Let $ D \subset \mathbb{R}^n $ be closed and convex (with a nonempty interior) and let $ f : D \mapsto D $ be a continuous mapping. Assume further that f is
+continuously differentiable in the interior of D and that it's Jacobian can be continuously extended to all of D such that
+
+$$
+\sup_{x \in D} \Vert f'(x)\Vert < 1
+$$
+
+in some norm $ \Vert \cdot \Vert $ on $ \mathbb{R}^n $. Then the equation f(x) = x has a unique solution $ x \in D$, and the successive approximations 
+
+$$
+ x_{v+1} := f(x_v),  v = 0,1,2,...
+$$
+
+converge for each $ x_0 \in D $ to this fixed point. We have the a priori error estimate 
+
+$$
+\Vert x_v - x \Vert \leq \frac{q^v}{1-q} \Vert x_1 - x_0 \Vert
+$$
+and the a posteriori error estimate
+$$
+\Vert x_v - x \Vert \leq \frac{q}{1-q} \Vert x_v - x_{v-1} \Vert
+$$
+for all $ v \in \mathbb{N} $
+
+\end{framed}
+
+
+In the following, it will be shown that the system of nonlinear equations (4) fulfills the criterions laid out above, therefore, the set of iterative
+sequences (5) converges to a solution, and the error estimates given above may be applied.
+\newline\newline\newline
+For a given set of players and games, $R_{pg}$, $R_{min}$ , $R_{max}$ are defined as a specific game result for player p, game g, and the worst and best results respectively: 
+\newline \newline
+\begin{center}
+$ R_{pg} = \frac{M(A_{pg})}{M(B_{pg})} $, $ R_{min} = \displaystyle\min(\frac{M(A_{pg})}{M(B_{pg})}) $, $R_{max} = \displaystyle\sup(\frac{M(A_{pg})}{M(B_{pg})}) $
+\end{center}
+
+Equation (5) may be written as 
+
+\begin{equation}
+W_p(n+1) = \sqrt[G]{\displaystyle\prod_{g=1}^{G}{O_{pg}(n)R_{pg}}} 
+\end{equation} 
+
+Which obviously has an upper bound in $$\displaystyle\sup_{1 \leq p \leq P}(W_p(n+1)) \leq \displaystyle\sup_{1 \leq p \leq P}(W_p(n))R_{max} $$
+Therefore, we have an upper bound for the sequence, given by $$ W_{max} = \displaystyle\sup_{1 \leq p \leq P}(W_p(0)) R_{max} $$
+Likewise, we have a lower bound for the sequence, given by $$ W_{min} = \displaystyle\min_{1 \leq p \leq P}(W_p(0)) R_{min} $$
+\newline\newline
+
+This allows to formulate the sequence in terms of a continuous mapping of a closed and convex subset of $\mathbb{R}^P$ required by the convergence Theorem 6.8.
+\newline\newline
+Let $ D = ( W_{min}, W_{max} )^P \subset \mathbb{R}^P $ with $ W = (W_1, ..., W_p) \in D$. Then \textbf{D is convex}, since componentwise the following statement can
+be trivially proven to be true $$ \lambda x_p + ( 1 - \lambda ) y_p \in ( W_{min}, W_{max} )$$ for all $ 1 \leq p \leq P$, all $ x,y \in D $ and all 
+$ \lambda \in (0,1)$. Likewise, \textbf{D is closed} since it consists componentwise of closed intervals over $ \mathbb{R} $,
+which are known to be closed sets, and each union of closed sets is again a closed set.  
+\newline\newline
+Furthermore, let f be a mapping where, componentwise we have
+
+\begin{equation}
+f_p(W) = \sqrt[G]{\displaystyle\prod_{g=1}^{G}{O_{pg}(n)R_{pg}}} 
+\end{equation}
+
+The proof for upper and lower bounds for the sequence $ W_t $ can be likewise applied to $ f_p(W) $, so 
+$ f_p(W) \in (W_{min},W_{max})$ for each $W \in D$, therefore
+$ f(W) \in D $ for each $ W \in D$, so f is in fact a mapping $ f : D \mapsto D $.
+\newline\newline
+Remember that $ O_{pg} $ is the strength of the opponent in game g of player p.  For each p, g  we have a $ t
+\in \mathbb{N}, t \neq p$ so that $ O_{pg} = W_t $, therefore f is indeed a mapping 
+
+$$
+f(W) = (f_1(W_1, ..., W_p), ..., f_p(W_1,...,W_p))^T
+$$
+
+which is obviously continuously differentiable in all of D.
+
+\pagebreak
+It is not required that each player plays against each other and a player can't play against himself.
+The Jacobian matrix is therefore zero for each combination of players which did not play against each other:
+\newline\newline
+\begin{center}
+$ f'_{pt}(W) = \frac{\partial f_p}{\partial W_t}(W)  = 0 $  for each p which did not play against t 
+\end{center}
+
+For all other cases, we have a partial derivative of $ f_p(W) $ 
+
+\begin{equation}
+f'_{pt}(W) = \frac{\partial f_p}{\partial W_t}(W) = \frac{1}{W_t}\sqrt[G]{\displaystyle\prod_{g=1}^{G}{O_{pg}(n)R_{pg}}} 
+\end{equation}
+
+Where $ W_t $ is equal to $ O_{pg} $ for one combination of p and g. This can be written as 
+
+$$
+f'_{pt}(W) = \frac{\partial f_p}{\partial W_{t}}(W) = \frac{1}{W_t} f_p(W)
+$$
+
+which obviously has an upper bound
+
+\begin{equation}
+\sup_{W \in D} f'_{pt}(W) = \frac{W_{max}}{W_{min}} 
+\end{equation}
+
+Which, using the $ L_{\infty} $ norm can be extended to the entire Jacobian.
+\newline\newline
+This allows to choose a norm $ \Vert A \Vert _D =   \frac{W{min}}{{W{max}+1}} \Vert A \Vert _{\infty} $ for which, obviously 
+$$
+\sup _{x \in D} \Vert f'(x) \Vert _D < 1
+$$
+
+Therefore, all convergence criterions are met. It can be concluded that the sequences of equation (5) converge on the solution
+to the nonlinear equation system (4). We also have an error estimate which can be used to determine a maximum error at step n. 
+Therefore, the solution to equation (4) can be calculated to any desired accuracy using a finite number of steps.
+
+\subsection*{Adapting the ranking algorithm to real world games}
+
+The function $ M : \mathbb{N} \mapsto \mathbb{R^*_+} $ models the possibly nonlinear relationship between the expected ratio of points
+between two players and their respective strengths. Recalling equation (1), we have
+
+$$
+ \frac{W_p}{ O_{pg} } = \frac{M(A_{pg})}{M(B_{pg})}  
+$$
+
+It would be desirable to be able to adapt M to different game characteristics. Games like Table Tennis, Jugger, Badminton, 
+Basketball or Soccer each have vastly different characteristics when it comes to the number of points which are usually achieved within a game,
+randomness of results and influence on the relative strengths of the players (or teams, respectively). Also, there might be tournaments or leagues
+which have a very homogenous field of players (i.e. the players are similar in strength), where other tournaments or leagues might be have a high variance in
+the strengths of the players.
+\newline
+\newline
+For most games, there are vast amounts of historical game results avaiable which may be used to optimize the model.
+Given a set of historical game results, it is possible to use the previously specified ranking algorithm to calculate strengths for all participating teams given
+a model function M. Using these calculated strengths, we can calculate expected ratios of points. The difference between these can be interpreted as the 
+error $ E_g $ for a given game g with results $A_g:B_g$ of the players with the strengths $W_g$ (which scored $A_b$) and $O_g$ (which scored $B_g$) respectively:
+
+\begin{equation}
+E_g(M) = \left\vert \frac{W_g}{ O_g } - \frac{M(A_{g})}{M(B_{g})} \right\vert  
+\end{equation}
+\newline\newline
+Therefore, the choice of a suitable M is reduced to an optimization problem which consists of finding 
+a suitable type of model function, and adapting model parameters to minimize errors. The most common way
+to achieve this would be to minimize the sum of squared errors - i.e. Least Squares method. 
+\newline\newline
+Other definitions of error might be more useful and lead to better results, for example it might be sensible to minimize the number of incorrectly
+predicted winners with topmost priority, while trying to reduce prediction errors in the achieved point ratios is only of secondary
+importance. The error function and optimization method could be adapted to reflect this.  
+\newline\newline
+One possible choice for M(x) has already been given in equation (2):
+
+$$
+M(x) = ( x + k)^p
+$$
+
+where $ k,p \in \mathbb{R} $ are model parameters. 
+\newline\newline
+
+By choosing reasonable ranges for the model parameters, it is now easily possible to find near-optimal model parameters by performing a complete
+grid search over k and p, and choosing those values of k and p which minimize the error and best meet the desired criterions.
+\newline\newline
+For the function given above, reasonal default ranges for k and p which are suitable for most games would probably be 
+$ 0.001 \leq k \leq 20 $ and $ 0.001 \leq  p \leq 3 $.
+\newline\newline
+Without any adaptation, k=1 and p=0.5 seem to be reasonable default values.
+
+\subsection*{Statistical Interpretation and Analysis}
+
+So far it has been assumed that a game result as given by the points achieved by two opposing players is indeed a statistical measure of their
+relative strengths. If we also assume that we have found an optimal model by adapting it to real world historical game data, as outlined
+in the previous section, it would be reasonable to assume that the remaining errors as given by equation (7) have random cause, and therefore
+follow a random distribution centered at 0.
+
+This is an assumption that occurs very frequently and can therefore be verified or rejected using standard statistical procedure.
+
+
+\begin{thebibliography}{9}
+\bibitem[Rainer Kress, Numerical Analysis]{NumAna}
+  Rainer Kress,
+  \emph{Numerical Analysis}.
+  Springer, ISBN 0-387-98408-9
+\end{thebibliography}
+
+\end{document}
