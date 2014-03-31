@@ -15,7 +15,7 @@ Then I did some Monte Carlo Simulations of virtual Tournaments with known ground
 The JRank System outperformed all other systems it was tested against by a vast margin.
 
 This repository contains the mathematical proof of convergence in the form of a small LaTex paper as well as a small Web-Application
-written in PHP (comments in German, sorry) which allows to play and simulate tournaments using this system and to compare
+written in PHP (completely in German, sorry) which allows to play and simulate tournaments using this system and to compare
 simulated results to competing systems.
 
 If you are fluent in German and want to see the working implementation and more friendly explanation of the system, please visit 
